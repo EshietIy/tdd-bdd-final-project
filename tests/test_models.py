@@ -27,7 +27,7 @@ import os
 import logging
 import unittest
 from decimal import Decimal
-from service.models import Product, Category, db
+from service.models import Product, Category, db, DataValidationError
 from service import app
 from tests.factories import ProductFactory
 
@@ -148,6 +148,9 @@ class TestProductModel(unittest.TestCase):
         new_product = products[0]
         self.assertEqual(new_product.id, product.id)
         self.assertEqual(new_product.description, description)
+        # check to raise error on empty ID
+        product.id = None
+        self.assertRaises(DataValidationError, product.update)
 
     def test_delete_a_product(self):
         """It should Delete a Product"""
@@ -192,8 +195,95 @@ class TestProductModel(unittest.TestCase):
         # Call the find_by_name() method on the Product class to retrieve products from the database that have the specified name.
         # Assert if the count of the found products matches the expected count.
         # Use a for loop to iterate over the found products and assert that each product's name matches the expected name, to ensure that all the retrieved products have the correct name.
-        for product in len(products):
+        for product in products:
             product.create()
         first_product = products[0].name
-        count = len([product.name : for product in products])
+        count = len([product for product in products if product.name == first_product])
+        found = Product.find_by_name(first_product)
+        self.assertEqual(found.count(), count)
+        for product in found:
+            self.assertEqual(product.name, first_product)
+        
+    def test_find_by_availability(self):
+        """It should Find Products by Availability"""
+        products = ProductFactory.create_batch(10)
+        # Use a for loop to iterate over the products list and call the create() method on each product to save them to the database.
+        # Retrieve the availability of the first product in the products list.
+        # Use a list comprehension to filter the products based on their availability and then use len() to calculate the length of the filtered list, and use the variable called count to hold the number of products that have the specified availability.
+        # Call the find_by_availability() method on the Product class to retrieve products from the database that have the specified availability.
+        # Assert if the count of the found products matches the expected count.
+        # Use a for loop to iterate over the found products and assert that each product's availability matches the expected availability, to ensure that all the retrieved products have the correct availability.
+
+        for product in products:
+            product.create()
+        available = products[0].available
+        count = len([product for product in products if product.available == available])
+        found = Product.find_by_availability(available)
+        self.assertEqual(found.count(), count)
+        for product in found:
+            self.assertEqual(product.available, available)
+
+    def test_find_by_category(self):
+        """It should Find Products by Category"""
+        products = ProductFactory.create_batch(10)
+        # Use a for loop to iterate over the products list and call the create() method on each product to save them to the database.
+        # Retrieve the category of the first product in the products list.
+        # Use a list comprehension to filter the products based on their category and then use len() to calculate the length of the filtered list, and use the variable called count to hold the number of products that have the specified category.
+        # Call the find_by_category() method on the Product class to retrieve products from the database that have the specified category.
+        # Assert if the count of the found products matches the expected count.
+        # Use a for loop to iterate over the found products and assert that each product's category matches the expected category, to ensure that all the retrieved products have the correct category.
+        for product in products:
+            product.create()
+        category = products[0].category
+        count = len([product for product in products if product.category == category])
+        found = Product.find_by_category(category)
+        self.assertEqual(found.count(), count)
+        for product in found:
+            self.assertEqual(product.category, category)
+
+    def test_find(self):
+        """"It should find a product by ID
+        """
+        products = ProductFactory.create_batch(10)
+        for product in products:
+            product.create()
+        productId = products[0].id
+        found = Product.find(productId)
+        self.assertEqual(found.id, productId)
+
+    def test_find_by_price(self):
+        """It should find product by price"""
+        products = ProductFactory.create_batch(10)
+        for product in products:
+            product.create()
+        price = products[0].price
+        count = len([product for product in products if product.price == price])
+        found = Product.find_by_price(price)
+        self.assertEqual(found.count(), count)
+        for product in found:
+            self.assertEqual(product.price, price)
+        # testing for price in string format
+        str_price = str(price)
+        found = Product.find_by_price(str_price)
+        self.assertEqual(found.count(), count)
+        for product in found:
+            self.assertEqual(product.price, price)
+
+    def test_deserialize(self):
+        """Ït shoud convert a python dictionary to product object"""
+        product = ProductFactory()
+        product_dict = product.serialize()
+        self.assertIsInstance(product_dict, dict)
+        product_from_dict = Product()
+        product_from_dict.deserialize(product_dict)
+        product_from_dict.create()
+        new_product = product.all()
+        self.assertEqual(new_product[0].name, product.name)
+        self.assertEqual(new_product[0].description, product.description)
+        self.assertEqual(new_product[0].category, product.category)
+        # raise error
+        product_dict["available"] = "Not a boolean"
+        product_from_dictTwo = Product()
+        self.assertRaises(DataValidationError, product_from_dictTwo.deserialize, product_dict)
+        
         
