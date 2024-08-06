@@ -285,5 +285,5 @@ class TestProductModel(unittest.TestCase):
         product_dict["available"] = "Not a boolean"
         product_from_dictTwo = Product()
         self.assertRaises(DataValidationError, product_from_dictTwo.deserialize, product_dict)
-        
+        self.assertRaises(DataValidationError, product_from_dictTwo.deserialize, "String")
         
