@@ -178,3 +178,20 @@ class TestProductRoutes(TestCase):
         data = response.get_json()
         # logging.debug("data = %s", data)
         return len(data)
+
+    def test_get_product(self):
+        """It Should read product"""
+        test_product = self._create_products()[0]
+        logging.info("making a get request")
+        response = self.client.get(f"{BASE_URL}/{test_product.id}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        new_product = response.get_json()
+        self.assertEqual(new_product["name"], test_product.name)
+        self.assertEqual(Decimal(new_product["price"]), test_product.price)
+        self.assertEqual(new_product["category"], test_product.category.name)
+
+    def test_get_product_not_found(self):
+        """ It shoud an HTTP 404 not found Error"""
+        logging.info("making a get request with a bad ID")
+        response = self.client.get(f"{BASE_URL}/0")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
