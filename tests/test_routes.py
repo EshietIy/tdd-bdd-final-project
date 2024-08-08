@@ -213,3 +213,13 @@ class TestProductRoutes(TestCase):
         updated_data = second_response.get_json()
         self.assertEqual(Decimal(updated_data["price"]), data["price"])
         self.assertEqual(updated_data["description"], data["description"])
+
+    def test_delete(self):
+        """It should delete a record and return note found"""
+        product = self._create_products(5)[2]
+        logging.info("getting id of product to be removed")
+        response = self.client.delete(f"{BASE_URL}/{product.id}")
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        remaining_products = self.cliet.get(f"{BASE_URL}")
+        self.assertEqual(remaining_products.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(remaining_products.get_json), 4)
