@@ -195,3 +195,21 @@ class TestProductRoutes(TestCase):
         logging.info("making a get request with a bad ID")
         response = self.client.get(f"{BASE_URL}/0")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_update_product(self):
+        """
+        It should update product stored already stored
+        """
+        product = self._create_products(10)[3]
+        logging.info("getting product with ID %d", product.id)
+        response = self.client.get(f"{BASE_URL}/{product.id}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        data["price"] = 200.50
+        data["description"] = "This was updated by Eshiet"
+        logging.info("updating product with ID %d", product.id)
+        second_response = self.client.put(f"{BASE_URL}/{product.id}", json=data)
+        self.assertEqual(second_response.status_code, status.HTTP_200_OK)
+        updated_data = second_response.get_json()
+        self.assertEqual(updated_data["price"], data["price"])
+        self.assertEqual(updated_data["description"], data["description"])
