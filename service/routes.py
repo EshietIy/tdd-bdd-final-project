@@ -121,7 +121,20 @@ def get_products(product_id):
 # U P D A T E   A   P R O D U C T
 ######################################################################
 
-#
+
+@app.route("/products/<int:product_id>", methods=["PUT"])
+def update_products(product_id):
+    """Update an already existing record"""
+    product = Product.find(int(product_id))
+    app.logger.info("geting product based on id")
+    if product is None:
+        app.logger.debug("no such record exist")
+        abort(status.HTTP_404_NOT_FOUND, f"No record exist for {product_id}")
+    data = request.get_json()
+    product.deserialize(data)
+    app.logger.info("product %d updating", product_id)
+    product.update()
+    return product.serialize(), status.HTTP_201_CREATED
 
 ######################################################################
 # D E L E T E   A   P R O D U C T

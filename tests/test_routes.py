@@ -198,7 +198,7 @@ class TestProductRoutes(TestCase):
 
     def test_update_product(self):
         """
-        It should update product stored already stored
+        It should update product stored already
         """
         product = self._create_products(10)[3]
         logging.info("getting product with ID %d", product.id)
@@ -209,7 +209,7 @@ class TestProductRoutes(TestCase):
         data["description"] = "This was updated by Eshiet"
         logging.info("updating product with ID %d", product.id)
         second_response = self.client.put(f"{BASE_URL}/{product.id}", json=data)
-        self.assertEqual(second_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(second_response.status_code, status.HTTP_201_CREATED)
         updated_data = second_response.get_json()
-        self.assertEqual(updated_data["price"], data["price"])
+        self.assertEqual(Decimal(updated_data["price"]), data["price"])
         self.assertEqual(updated_data["description"], data["description"])
