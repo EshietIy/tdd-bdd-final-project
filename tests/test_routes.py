@@ -220,6 +220,5 @@ class TestProductRoutes(TestCase):
         logging.info("getting id of product to be removed")
         response = self.client.delete(f"{BASE_URL}/{product.id}")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        remaining_products = self.cliet.get(f"{BASE_URL}")
-        self.assertEqual(remaining_products.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(remaining_products.get_json), 4)
+        logging.info("expecting to see 4 remaining products")
+        self.assertEqual(self.get_product_count(), 4)

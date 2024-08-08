@@ -141,6 +141,29 @@ def update_products(product_id):
 ######################################################################
 
 
-#
-# PLACE YOUR CODE TO DELETE A PRODUCT HERE
-#
+@app.route("/products/<int:product_id>", methods=["DELETE"])
+def delete_product(product_id):
+    """Delete specified product"""
+    product = Product.find(int(product_id))
+    app.logger.info("geting product to deleted based on id")
+    if product is None:
+        app.logger.debug("no such record exist")
+        abort(status.HTTP_404_NOT_FOUND, f"No record exist for {product_id}")
+    product.delete()
+    return "", status.HTTP_204_NO_CONTENT
+
+######################################################################
+# G E T   A L L  P R O D U C T S
+######################################################################
+
+
+@app.route("/products", methods=["GET"])
+def get_all_products():
+    """Returns all the products"""
+    products = Product.all()
+    if products is None:
+        app.logger.debug("no products exist")
+        abort(status.HTTP_404_NOT_FOUND, "No record exist")
+    results = [product.serialize() for product in products]
+    app.logger.info("returns %s list of product", len(results))
+    return results, status.HTTP_200_OK
