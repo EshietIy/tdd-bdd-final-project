@@ -222,3 +222,15 @@ class TestProductRoutes(TestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         logging.info("expecting to see 4 remaining products")
         self.assertEqual(self.get_product_count(), 4)
+
+    def test_list_all(self):
+        """It should return a list of all product"""
+        products = self._create_products(10)
+        logging.info("Ten products created")
+        products_id = [product.id for product in products]
+        logging.info("request products from API")
+        respond = self.client.get(BASE_URL)
+        data = respond.get_json()
+        self.assertEqual(len(data), len(products_id))
+        for product in data:
+            self.assertTrue((product["id"] in products_id))
