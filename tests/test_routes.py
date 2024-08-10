@@ -28,6 +28,7 @@ import os
 import logging
 from decimal import Decimal
 from unittest import TestCase
+from urllib.parse import quote_plus
 from service import app
 from service.common import status
 from service.models import db, init_db, Product
@@ -234,3 +235,12 @@ class TestProductRoutes(TestCase):
         self.assertEqual(len(data), len(products_id))
         for product in data:
             self.assertTrue((product["id"] in products_id))
+
+    def test_list_by_name(self):
+        """It should return only the product based on the name"""
+        product = self._create_products(5)[2]
+        logging.info("get a product based on the name => %s", product.name)
+        respond = self.client.get(BASE_URL, query_string=f"name={quote_plus(product.name)}")
+        logging.info("respond recive based on the name requested")
+        self.assertEqual(respond.status_code, status.HTTP_200_OK)
+        self.assertEqual(respond.get_json()[0]["name"], product.name)

@@ -158,7 +158,20 @@ def delete_product(product_id):
 @app.route("/products", methods=["GET"])
 def get_all_products():
     """Returns all the products"""
-    products = Product.all()
+    products = []
+    app.logger.info("check if name argument was passed")
+    name = request.args.get("name")
+    if name:
+        app.logger.info("find by name %s", name)
+        products = Product.find_by_name(name)
+    else:
+        app.logger.info("find all")
+        products = Product.all()
     results = [product.serialize() for product in products]
+    app.logger.critical(results)
     app.logger.info("returns %s list of product", len(results))
     return results, status.HTTP_200_OK
+
+######################################################################
+# G E T    P R O D U C T S    BY    N A M E
+######################################################################
